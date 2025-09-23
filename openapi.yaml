@@ -1,0 +1,195 @@
+openapi: 3.0.3
+info:
+  title: Gym SaaS API
+  version: 0.1.0
+  description: REST API for a Gym Management SaaS (Spring Boot oriented)
+servers:
+  - url: https://api.example.com/v1
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: JWT tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  refreshToken: { type: string }
+  /members:
+    get: { summary: List members, responses: { '200': { description: OK } } }
+    post:
+      summary: Create member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Member' }
+      responses: { '201': { description: Created } }
+  /members/{id}:
+    get: { summary: Get member, parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ], responses: { '200': { description: OK } } }
+    put:
+      summary: Update member
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Member' }
+      responses: { '200': { description: Updated } }
+    delete:
+      summary: Delete member
+      parameters: [ { in: path, name: id, required: true, schema: { type: integer } } ]
+      responses: { '204': { description: No Content } }
+  /trainers:
+    get: { summary: List trainers, responses: { '200': { description: OK } } }
+    post:
+      summary: Create trainer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Trainer' }
+      responses: { '201': { description: Created } }
+  /plans:
+    get: { summary: List plans, responses: { '200': { description: OK } } }
+    post:
+      summary: Create plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Plan' }
+      responses: { '201': { description: Created } }
+  /subscriptions:
+    get: { summary: List subscriptions, responses: { '200': { description: OK } } }
+    post:
+      summary: Create subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Subscription' }
+      responses: { '201': { description: Created } }
+  /classes:
+    get: { summary: List class sessions, responses: { '200': { description: OK } } }
+    post:
+      summary: Create class session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClassSession' }
+      responses: { '201': { description: Created } }
+  /classes/{id}/bookings:
+    post:
+      summary: Book class
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                memberId: { type: integer }
+      responses:
+        '201': { description: Created }
+  /payments:
+    get: { summary: List payments, responses: { '200': { description: OK } } }
+    post:
+      summary: Create payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Payment' }
+      responses: { '201': { description: Created } }
+  /attendance:
+    post:
+      summary: Record attendance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Attendance' }
+      responses:
+        '201': { description: Created }
+
+components:
+  schemas:
+    Member:
+      type: object
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        dateOfBirth: { type: string, format: date }
+        gender: { type: string }
+    Trainer:
+      type: object
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        lastName: { type: string }
+        specialization: { type: string }
+        phone: { type: string }
+        email: { type: string }
+    Plan:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        price: { type: number, format: double }
+        durationInDays: { type: integer }
+    Subscription:
+      type: object
+      properties:
+        id: { type: integer }
+        memberId: { type: integer }
+        planId: { type: integer }
+        trainerId: { type: integer, nullable: true }
+        startDate: { type: string, format: date }
+        endDate: { type: string, format: date }
+        status: { type: string }
+    Payment:
+      type: object
+      properties:
+        id: { type: integer }
+        memberId: { type: integer }
+        amount: { type: number, format: double }
+        paymentDate: { type: string, format: date }
+        method: { type: string }
+        status: { type: string }
+    ClassSession:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        startTime: { type: string, format: date-time }
+        endTime: { type: string, format: date-time }
+        location: { type: string }
+        trainerId: { type: integer }
+        capacity: { type: integer }
+    Attendance:
+      type: object
+      properties:
+        id: { type: integer }
+        memberId: { type: integer }
+        classSessionId: { type: integer, nullable: true }
+        checkInTime: { type: string, format: date-time }
+        checkOutTime: { type: string, format: date-time }

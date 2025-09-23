@@ -1,0 +1,251 @@
+@startuml StrongHub_Classes_MT
+skinparam classAttributeIconSize 0
+title StrongHub – Class Diagram (Multi-tenant, Spring Boot)
+
+' ========= Tenancy & Security =========
+class Gym {
+  - Long id
+  - String name
+  - String country
+  - String currency
+  - String status
+  - String settingsJson        ' JSONB en BD
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class User {
+  - Long id
+  - String username
+  - String passwordHash
+  - Boolean enabled
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class Role {
+  - Long id
+  - String name
+}
+
+class GymUser {
+  - Long id
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class GymUserRole {
+  ' PK: (gymUserId, roleId)
+}
+
+Gym "1" -- "0..*" GymUser
+User "1" -- "0..*" GymUser
+GymUser "1" -- "0..*" GymUserRole
+Role "1" -- "0..*" GymUserRole
+
+' ========= People (global) + membership per gym =========
+class Member {
+  - Long id
+  - String firstName
+  - String lastName
+  - String email
+  - String phone
+  - LocalDate dateOfBirth
+  - String gender
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class GymMember {
+  - Long id
+  - String status          ' ACTIVE | INACTIVE
+  - Instant joinedAt
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class Trainer {
+  - Long id
+  - String firstName
+  - String lastName
+  - String specialization
+  - String phone
+  - String email
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class GymTrainer {
+  - Long id
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+Gym "1" -- "0..*" GymMember
+Member "1" -- "0..*" GymMember
+Gym "1" -- "0..*" GymTrainer
+Trainer "1" -- "0..*" GymTrainer
+
+' ========= Catalogs (enum-like) =========
+class SubscriptionStatus <<enum>> {
+  ACTIVE
+  PAUSED
+  CANCELED
+  EXPIRED
+}
+class PaymentMethod <<enum>> {
+  CASH
+  CARD
+  TRANSFER
+  ONLINE
+}
+class PaymentStatus <<enum>> {
+  PAID
+  PENDING
+  FAILED
+  REFUNDED
+}
+class BookingStatus <<enum>> {
+  BOOKED
+  CANCELED
+  NO_SHOW
+}
+
+' ========= Rooms / Locations =========
+class Room {
+  - Long id
+  - String name
+  - Integer capacity
+  - String type
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+Gym "1" -- "0..*" Room
+
+' ========= Gym Products & Subscriptions =========
+class Plan {
+  - Long id
+  - String name
+  - String description
+  - BigDecimal price
+  - Integer durationInDays
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class Subscription {
+  - Long id
+  - LocalDate startDate
+  - LocalDate endDate
+  - SubscriptionStatus status
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+Gym "1" -- "0..*" Plan
+Plan "1" -- "0..*" Subscription
+GymMember "1" -- "0..*" Subscription
+GymTrainer "0..1" -- "0..*" Subscription
+
+' ========= Classes / Bookings / Attendance =========
+class ClassSession {
+  - Long id
+  - String name
+  - LocalDateTime startTime
+  - LocalDateTime endTime
+  - Integer capacity
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+Gym "1" -- "0..*" ClassSession
+Room "1" -- "0..*" ClassSession
+GymTrainer "0..1" -- "0..*" ClassSession
+
+class ClassBooking {
+  - Long id
+  - BookingStatus status
+  - Instant bookedAt
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+ClassSession "1" -- "0..*" ClassBooking
+GymMember   "1" -- "0..*" ClassBooking
+
+class Attendance {
+  - Long id
+  - LocalDateTime checkInTime
+  - LocalDateTime checkOutTime
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+GymMember   "1" -- "0..*" Attendance
+ClassSession "0..1" -- "0..*" Attendance
+
+' ========= Payments (gym -> member) =========
+class Payment {
+  - Long id
+  - BigDecimal amount
+  - LocalDate paymentDate
+  - PaymentMethod method
+  - PaymentStatus status
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+Gym "1" -- "0..*" Payment
+GymMember "1" -- "0..*" Payment
+
+' ========= B2B (vendor -> gym) =========
+class VendorPlan {
+  - Long id
+  - String name
+  - BigDecimal basePrice
+  - Integer memberQuota
+  - BigDecimal overagePrice
+  - String featuresJson
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class GymVendorSubscription {
+  - Long id
+  - LocalDate startDate
+  - LocalDate endDate
+  - String status
+  - BigDecimal customBasePrice
+  - Integer customMemberQuota
+  - BigDecimal customOveragePrice
+  - Instant createdAt
+  - Instant updatedAt
+  - Instant deletedAt
+}
+
+class MetricsGymMonthly {
+  - Long id
+  - LocalDate month
+  - Integer activeMembers
+  - Integer bookings
+  - BigDecimal storageGb
+  - Instant createdAt
+  - Instant updatedAt
+}
+
+VendorPlan "1" -- "0..*" GymVendorSubscription
+Gym "1" -- "0..*" GymVendorSubscription
+Gym "1" -- "0..*" MetricsGymMonthly
+
+@enduml

@@ -1,0 +1,346 @@
+```plantuml
+@startuml StrongHub_ER
+skinparam classAttributeIconSize 0
+title StrongHub – ER (Multi-tenant, Catálogos, Rooms, B2B)
+
+' =======================
+' Tenancy & Security
+' =======================
+entity gyms {
+  * id : serial <<PK>>
+  --
+  name : varchar(120)
+  country : varchar(2)
+  currency : varchar(3)
+  status : varchar(20)
+  settings : jsonb
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity users {
+  * id : serial <<PK>>
+  --
+  username : varchar(80) <<UNIQUE>>
+  password_hash : varchar(200)
+  enabled : boolean
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity roles {
+  * id : serial <<PK>>
+  --
+  name : varchar(50) <<UNIQUE>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity user_roles {
+  * user_id : int <<FK>>
+  * role_id : int <<FK>>
+  --
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity gym_users {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  user_id : int <<FK>>
+  <<UNIQUE (gym_id, user_id)>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity gym_user_roles {
+  * gym_user_id : int <<FK>>
+  * role_id : int <<FK>>
+  --
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+users ||--o{ user_roles
+roles ||--o{ user_roles
+gyms  ||--o{ gym_users
+users ||--o{ gym_users
+gym_users ||--o{ gym_user_roles
+roles    ||--o{ gym_user_roles
+
+' =======================
+' People (global) + membership per gym
+' =======================
+entity members {
+  * id : serial <<PK>>
+  --
+  first_name : varchar(80)
+  last_name  : varchar(80)
+  email      : varchar(120) <<UNIQUE>>
+  phone      : varchar(40)
+  date_of_birth : date
+  gender : varchar(20)
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity trainers {
+  * id : serial <<PK>>
+  --
+  first_name : varchar(80)
+  last_name  : varchar(80)
+  specialization : varchar(120)
+  phone : varchar(40)
+  email : varchar(120)
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity gym_members {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  member_id : int <<FK>>
+  status : varchar(20)
+  joined_at : timestamptz
+  <<UNIQUE (gym_id, member_id)>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity gym_trainers {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  trainer_id : int <<FK>>
+  <<UNIQUE (gym_id, trainer_id)>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+members ||--o{ gym_members
+gyms    ||--o{ gym_members
+trainers ||--o{ gym_trainers
+gyms     ||--o{ gym_trainers
+
+' =======================
+' Catalogs (enum-like)
+' =======================
+entity subscription_status {
+  * code : varchar(20) <<PK>>
+  --
+  description : text
+}
+
+entity payment_method {
+  * code : varchar(20) <<PK>>
+  --
+  description : text
+}
+
+entity payment_status {
+  * code : varchar(20) <<PK>>
+  --
+  description : text
+}
+
+entity booking_status {
+  * code : varchar(20) <<PK>>
+  --
+  description : text
+}
+
+' =======================
+' Rooms / Locations
+' =======================
+entity rooms {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  name : varchar(120)
+  capacity : int
+  type : varchar(40)
+  <<UNIQUE (gym_id, name)>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+gyms ||--o{ rooms
+
+' =======================
+' Gym products & subscriptions
+' =======================
+entity plans {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  name : varchar(80)
+  description : text
+  price : numeric(12,2)
+  duration_days : int
+  <<UNIQUE (gym_id, name)>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity subscriptions {
+  * id : serial <<PK>>
+  --
+  gym_id   : int <<FK>>
+  member_id: int <<FK>>   ' -> gym_members(gym_id, member_id)
+  plan_id  : int <<FK>>   ' -> plans(gym_id, id)
+  trainer_id : int <<FK>> ' -> gym_trainers(gym_id, trainer_id) (opcional)
+  start_date : date
+  end_date   : date
+  status : varchar(20) <<FK>>  ' -> subscription_status(code)
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+gyms  ||--o{ plans
+plans ||--o{ subscriptions
+gym_members ||--o{ subscriptions
+gym_trainers ||--o{ subscriptions
+subscription_status ||--o{ subscriptions
+
+' =======================
+' Classes / Bookings / Attendance
+' =======================
+entity class_sessions {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  name : varchar(120)
+  start_time : timestamptz
+  end_time   : timestamptz
+  room_id : int <<FK>>
+  trainer_id : int <<FK>> ' -> gym_trainers(gym_id, trainer_id)
+  capacity : int
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity class_bookings {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  class_id : int <<FK>>   ' -> class_sessions(gym_id, id)
+  member_id: int <<FK>>   ' -> gym_members(gym_id, member_id)
+  status : varchar(20) <<FK>> ' -> booking_status(code)
+  booked_at : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+  <<UNIQUE (gym_id, class_id, member_id)>>
+}
+
+entity attendance {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  member_id : int <<FK>>  ' -> gym_members(gym_id, member_id)
+  class_id  : int <<FK>>  ' -> class_sessions(gym_id, id) NULLABLE
+  check_in  : timestamptz
+  check_out : timestamptz
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+gyms ||--o{ class_sessions
+rooms ||--o{ class_sessions
+gym_trainers ||--o{ class_sessions
+class_sessions ||--o{ class_bookings
+gym_members    ||--o{ class_bookings
+booking_status ||--o{ class_bookings
+class_sessions ||--o{ attendance
+gym_members    ||--o{ attendance
+
+' =======================
+' Payments (gym -> member)
+' =======================
+entity payments {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  member_id : int <<FK>>  ' -> gym_members(gym_id, member_id)
+  amount : numeric(12,2)
+  payment_date : date
+  method : varchar(20) <<FK>> ' -> payment_method(code)
+  status : varchar(20) <<FK>> ' -> payment_status(code)
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+gyms ||--o{ payments
+gym_members ||--o{ payments
+payment_method ||--o{ payments
+payment_status ||--o{ payments
+
+' =======================
+' Your B2B monetization (vendor -> gym)
+' =======================
+entity vendor_plans {
+  * id : serial <<PK>>
+  --
+  name : varchar(80) <<UNIQUE>>
+  base_price : numeric(12,2)
+  member_quota : int
+  overage_price : numeric(12,2)
+  features : jsonb
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity gym_vendor_subscriptions {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  vendor_plan_id : int <<FK>>
+  start_date : date
+  end_date : date
+  status : varchar(20)
+  custom_base_price : numeric(12,2)
+  custom_member_quota : int
+  custom_overage_price : numeric(12,2)
+  <<UNIQUE (gym_id, vendor_plan_id, start_date)>>
+  created_at : timestamptz
+  updated_at : timestamptz
+  deleted_at : timestamptz
+}
+
+entity metrics_gym_monthly {
+  * id : serial <<PK>>
+  --
+  gym_id : int <<FK>>
+  month : date
+  active_members : int
+  bookings : int
+  storage_gb : numeric(10,2)
+  <<UNIQUE (gym_id, month)>>
+  created_at : timestamptz
+  updated_at : timestamptz
+}
+
+vendor_plans ||--o{ gym_vendor_subscriptions
+gyms ||--o{ gym_vendor_subscriptions
+gyms ||--o{ metrics_gym_monthly
+@enduml
+```
