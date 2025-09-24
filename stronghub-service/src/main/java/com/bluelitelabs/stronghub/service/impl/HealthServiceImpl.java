@@ -30,6 +30,6 @@ public class HealthServiceImpl implements HealthService {
 		}
 		long elapsedMs = (System.nanoTime() - start) / 1_000_000L;
 
-		return DBHealthResponse.builder().status(status).latencyMs(elapsedMs).detail(detail).build();
+		return new DBHealthResponse.Builder().status(status).latencyMs(elapsedMs).detail(detail).build();
 	}
 }

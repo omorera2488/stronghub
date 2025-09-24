@@ -35,8 +35,9 @@ public class HealthController {
 	@GetMapping
 	public ResponseEntity<HealthResponse> health() {
 		DBHealthResponse db = healthService.pingDb();
-		HealthResponse resp = HealthResponse.builder().status("UP").app(appName).version(appVersion)
+		HealthResponse resp = new HealthResponse.Builder().status("UP").app(appName).version(appVersion)
 				.time(OffsetDateTime.now(ZoneOffset.UTC).toString()).db(db).build();
+
 		return ResponseEntity.ok(resp);
 	}
 
