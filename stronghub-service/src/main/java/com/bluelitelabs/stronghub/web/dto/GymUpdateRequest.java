@@ -2,33 +2,20 @@ package com.bluelitelabs.stronghub.web.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class GymDto {
-	private Long id;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public class GymUpdateRequest {
+	@NotBlank
+	@Size(max = 120)
 	private String name;
+	@Size(max = 2)
 	private String country;
+	@Size(max = 3)
 	private String currency;
+	@Size(max = 20)
 	private String status;
 	private JsonNode settings;
-
-	public GymDto() {
-	}
-
-	public GymDto(Long id, String name, String country, String currency, String status, JsonNode settings) {
-		this.id = id;
-		this.name = name;
-		this.country = country;
-		this.currency = currency;
-		this.status = status;
-		this.settings = settings;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;
@@ -69,5 +56,4 @@ public class GymDto {
 	public void setSettings(JsonNode settings) {
 		this.settings = settings;
 	}
-
 }

@@ -1,6 +1,11 @@
 package com.bluelitelabs.stronghub.domain.model;
 
-import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.type.SqlTypes;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +19,8 @@ import jakarta.persistence.Table;
 @Table(name = "gyms", indexes = { @Index(name = "ix_gym_name", columnList = "name", unique = true),
 		@Index(name = "ix_gym_country", columnList = "country"),
 		@Index(name = "ix_gym_status", columnList = "status") })
+@SQLDelete(sql = "UPDATE gyms SET deleted_at = now() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Gym extends BaseAuditable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,11 +38,9 @@ public class Gym extends BaseAuditable {
 	@Column(name = "status", length = 20, nullable = false)
 	private String status;
 
+	@JdbcTypeCode(SqlTypes.JSON) // 👈 native JSONB
 	@Column(name = "settings", columnDefinition = "jsonb")
-	private String settings;
-
-	@Column(name = "deleted_at")
-	private Instant deletedAt;
+	private JsonNode settings;
 
 	public Gym() {
 	}
@@ -80,20 +85,12 @@ public class Gym extends BaseAuditable {
 		this.status = status;
 	}
 
-	public String getSettings() {
+	public JsonNode getSettings() {
 		return settings;
 	}
 
-	public void setSettings(String settings) {
+	public void setSettings(JsonNode settings) {
 		this.settings = settings;
-	}
-
-	public Instant getDeletedAt() {
-		return deletedAt;
-	}
-
-	public void setDeletedAt(Instant deletedAt) {
-		this.deletedAt = deletedAt;
 	}
 
 }
