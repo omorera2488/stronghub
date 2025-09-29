@@ -1,4 +1,4 @@
-package com.bluelitelabs.stronghub.dto;
+package com.bluelitelabs.stronghub.web.dto;
 
 import java.util.Objects;
 

@@ -1,18 +1,17 @@
-package com.bluelitelabs.stronghub.controller;
+package com.bluelitelabs.stronghub.web.controller;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bluelitelabs.stronghub.dto.DBHealthResponse;
-import com.bluelitelabs.stronghub.dto.HealthResponse;
-import com.bluelitelabs.stronghub.service.HealthService;
+import com.bluelitelabs.stronghub.application.HealthService;
+import com.bluelitelabs.stronghub.web.dto.DBHealthResponse;
+import com.bluelitelabs.stronghub.web.dto.HealthResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,8 +21,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Health", description = "Service & DB health checks")
 public class HealthController {
 
-	@Autowired
-	private HealthService healthService;
+	private final HealthService healthService;
+
+	public HealthController(HealthService healthService) {
+		super();
+		this.healthService = healthService;
+	}
 
 	@Value("${spring.application.name:stronghub-service}")
 	private String appName;
