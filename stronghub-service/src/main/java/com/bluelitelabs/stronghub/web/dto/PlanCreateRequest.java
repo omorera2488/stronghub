@@ -2,39 +2,28 @@ package com.bluelitelabs.stronghub.web.dto;
 
 import java.math.BigDecimal;
 
-public class PlanDto {
-	private Long id;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
+public class PlanCreateRequest {
+	@NotNull
+	@Positive
 	private Long gymId;
-	private String gymName;
+	@NotBlank
+	@Size(max = 120)
 	private String name;
+	@Size(max = 500)
 	private String description;
+	@NotNull
+	@DecimalMin(value = "0.0")
 	private BigDecimal price;
+	@NotNull
+	@Min(value = 1)
 	private Integer durationDays;
-	private boolean active;
-
-	public PlanDto() {
-	}
-
-	public PlanDto(Long id, String name, String description, BigDecimal price, Integer durationDays, boolean active,
-			Long gymId, String gymName) {
-		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.price = price;
-		this.durationDays = durationDays;
-		this.active = active;
-		this.gymId = gymId;
-		this.gymName = gymName;
-	}
-
-	// getters/setters…
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;
@@ -68,11 +57,12 @@ public class PlanDto {
 		this.durationDays = durationDays;
 	}
 
-	public boolean isActive() {
-		return active;
+	public Long getGymId() {
+		return gymId;
 	}
 
-	public void setActive(boolean active) {
-		this.active = active;
+	public void setGymId(Long gymId) {
+		this.gymId = gymId;
 	}
+
 }

@@ -26,13 +26,13 @@ public class Gym extends BaseAuditable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "name", nullable = false, length = 150)
+	@Column(name = "name", nullable = false, length = 120)
 	private String name;
 
-	@Column(name = "country", length = 5, nullable = false)
+	@Column(name = "country", length = 2, nullable = false)
 	private String country;
 
-	@Column(name = "currency", length = 5, nullable = false)
+	@Column(name = "currency", length = 3, nullable = false)
 	private String currency;
 
 	@Column(name = "status", length = 20, nullable = false)

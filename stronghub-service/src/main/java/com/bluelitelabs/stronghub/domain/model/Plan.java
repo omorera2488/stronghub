@@ -2,6 +2,9 @@ package com.bluelitelabs.stronghub.domain.model;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,6 +20,8 @@ import jakarta.persistence.UniqueConstraint;
 		@UniqueConstraint(name = "uq_plan_gym_id", columnNames = { "gym_id", "id" }) }, indexes = {
 				@Index(name = "ix_plans_gym_id_id", columnList = "gym_id,id"),
 				@Index(name = "ix_plan_gym", columnList = "gym_id") })
+@SQLDelete(sql = "UPDATE plans SET deleted_at = now() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Plan extends BaseTenantScoped {
 
 	@Id

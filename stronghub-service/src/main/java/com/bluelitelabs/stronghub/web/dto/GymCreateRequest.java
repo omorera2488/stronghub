@@ -11,12 +11,11 @@ public class GymCreateRequest {
 	@Size(max = 120)
 	private String name;
 	@Size(max = 2)
-	private String country; // ISO-2 (opcional)
+	private String country;
 	@Size(max = 3)
-	private String currency; // ISO-3 (opcional)
+	private String currency;
 	@Size(max = 20)
-	private String status; // ACTIVE/INACTIVE/etc
-	// JSON como string; si luego quieres tiparlo, hacemos un Converter
+	private String status;
 	private JsonNode settings;
 
 	public String getName() {
