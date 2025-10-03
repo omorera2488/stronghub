@@ -2,37 +2,30 @@ package com.bluelitelabs.stronghub.web.dto;
 
 import java.time.LocalDate;
 
-public class MemberDto {
-	private Long id;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public class MemberCreateRequest {
+	@NotBlank
 	private String firstName;
+	@NotBlank
 	private String lastName;
+	@Email
+	@NotBlank
 	private String email;
 	private String phone;
 	private LocalDate dateOfBirth;
 	private String gender;
 
-	public MemberDto() {
-		// TODO Auto-generated constructor stub
-	}
-
-	public MemberDto(Long id, String firstName, String lastName, String email, String phone, LocalDate dateOfBirth,
+	public MemberCreateRequest(String firstName, String lastName, String email, String phone, LocalDate dateOfBirth,
 			String gender) {
 		super();
-		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
 		this.phone = phone;
 		this.dateOfBirth = dateOfBirth;
 		this.gender = gender;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getFirstName() {

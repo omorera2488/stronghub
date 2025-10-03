@@ -34,7 +34,9 @@ public class GymMember extends BaseAuditable {
 
 	@Column(name = "joined_at", nullable = false)
 	private Instant joinedAt = Instant.now();
-	// getters/setters...
+
+	@Column(name = "plan_id", nullable = false)
+	private Long planId;
 
 	public Long getId() {
 		return id;
@@ -74,6 +76,14 @@ public class GymMember extends BaseAuditable {
 
 	public void setJoinedAt(Instant joinedAt) {
 		this.joinedAt = joinedAt;
+	}
+
+	public Long getPlanId() {
+		return planId;
+	}
+
+	public void setPlanId(Long planId) {
+		this.planId = planId;
 	}
 
 }
