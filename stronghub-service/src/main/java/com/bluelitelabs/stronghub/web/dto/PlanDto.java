@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 
 public class PlanDto {
 	private Long id;
-	private Long gymId;
-	private String gymName;
 	private String name;
 	private String description;
 	private BigDecimal price;
 	private Integer durationDays;
-	private boolean active;
+	private boolean active; // (deleted_at == null)
+	private Long gymId; // nuevo
+	private String gymName; // nuevo
 
 	public PlanDto() {
 	}

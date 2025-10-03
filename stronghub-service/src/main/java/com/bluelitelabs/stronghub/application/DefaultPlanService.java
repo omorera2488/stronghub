@@ -45,7 +45,9 @@ public class DefaultPlanService implements PlanService {
 		if (safe == null || safe.length == 0)
 			safe = new String[] { "name,asc", "id,asc" };
 		Pageable pageable = Paging.page(page, size, safe);
-		return repo.findByGymId(gymId, pageable).map(mapper::toDto);
+		Page<PlanDto> pageDto = repo.findAllByGymIdAsDto(gymId, pageable);
+
+		return pageDto;
 	}
 
 	@Override
@@ -55,7 +57,8 @@ public class DefaultPlanService implements PlanService {
 		if (safe == null || safe.length == 0)
 			safe = new String[] { "name,asc", "id,asc" };
 		Pageable pageable = Paging.page(spec.getPage(), spec.getSize(), safe);
-		return repo.findAll(pageable).map(mapper::toDto);
+
+		return repo.findAllAsDto(pageable);
 	}
 
 	@Override
@@ -66,13 +69,13 @@ public class DefaultPlanService implements PlanService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = { "plans:list" }, allEntries = true)
+	@CacheEvict(cacheNames = { "plans:list", "plans:list:gym" }, allEntries = true)
 	public PlanDto create(PlanCreateRequest request) {
 		Plan plan = mapper.toEntity(request);
 		try {
 			plan = repo.save(plan);
 		} catch (DataIntegrityViolationException e) {
-			// Name Duplicated
+			// name duplicated by gym (unique index)
 			throw e;
 		}
 		return mapper.toDto(plan);
@@ -80,7 +83,7 @@ public class DefaultPlanService implements PlanService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = { "plans:list", "plans:byId" }, allEntries = true)
+	@CacheEvict(cacheNames = { "plans:list", "plans:list:gym", "plans:byId" }, allEntries = true)
 	public Optional<PlanDto> update(Long id, PlanUpdateRequest request) {
 		return repo.findById(id).map(entity -> {
 			mapper.apply(entity, request);
@@ -95,7 +98,7 @@ public class DefaultPlanService implements PlanService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = { "plans:list", "plans:byId" }, allEntries = true)
+	@CacheEvict(cacheNames = { "plans:list", "plans:list:gym", "plans:byId" }, allEntries = true)
 	public boolean delete(Long id) {
 		return repo.findById(id).map(entity -> {
 			entity.setDeletedAt(Instant.now()); // soft delete

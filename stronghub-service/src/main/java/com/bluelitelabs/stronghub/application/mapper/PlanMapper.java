@@ -10,24 +10,26 @@ import com.bluelitelabs.stronghub.web.dto.PlanUpdateRequest;
 @Component
 public class PlanMapper {
 	public PlanDto toDto(Plan p) {
-		return new PlanDto(p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getDurationDays(), true);
+		boolean active = (p.getDeletedAt() == null);
+		return new PlanDto(p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getDurationDays(), active,
+				p.getGymId(), null);
 	}
 
-	public Plan toEntity(PlanCreateRequest planRequest) {
+	public Plan toEntity(PlanCreateRequest req) {
 		Plan plan = new Plan();
-		plan.setGymId(planRequest.getGymId());
-		plan.setName(planRequest.getName());
-		plan.setDescription(planRequest.getDescription());
-		plan.setPrice(planRequest.getPrice());
-		plan.setDurationDays(planRequest.getDurationDays());
+		plan.setGymId(req.getGymId());
+		plan.setName(req.getName());
+		plan.setDescription(req.getDescription());
+		plan.setPrice(req.getPrice());
+		plan.setDurationDays(req.getDurationDays());
 		return plan;
 	}
 
-	public void apply(Plan plan, PlanUpdateRequest planRequest) {
-		plan.setGymId(planRequest.getGymId());
-		plan.setName(planRequest.getName());
-		plan.setDescription(planRequest.getDescription());
-		plan.setPrice(planRequest.getPrice());
-		plan.setDurationDays(planRequest.getDurationDays());
+	public void apply(Plan plan, PlanUpdateRequest req) {
+		plan.setGymId(req.getGymId());
+		plan.setName(req.getName());
+		plan.setDescription(req.getDescription());
+		plan.setPrice(req.getPrice());
+		plan.setDurationDays(req.getDurationDays());
 	}
 }
